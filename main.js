@@ -26,29 +26,75 @@ require.config({
 });
 
 require([
-    "jquery",
     "tmxjs/map",
     "tmxjs/util/util"
 ], function (
-    $,
     Map,
     U
 ) {
-    var url = "examples/desert.tmx";
+    let url = "examples/desert.tmx";
 
-    var options = {
+    let options = {
         dir: url.split("/").slice(0, -1) || "."
     };
 
+    // var myGameArea = {
+    //     canvas : document.createElement("canvas"),
+    //     start : function() {
+    //       this.canvas.width = 480;
+    //       this.canvas.height = 270;
+    //       this.context = this.canvas.getContext("2d");
+    //       document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+    //       this.interval = setInterval(updateGameArea, 20);
+    //       window.addEventListener('keydown', function (e) {
+    //         myGameArea.key = e.keyCode;
+    //       })
+    //       window.addEventListener('keyup', function (e) {
+    //         myGameArea.key = false;
+    //       })
+    //     },
+    //     clear : function(){
+    //       this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    //     }
+    //   }
+
+    let topChar = 320;
+    let leftChar = 544;
+
+    //Move a character
+    const moveCharacter = event => {
+        console.log(event)
+        console.log(event.key)
+
+        //Up
+        if (event.key === "ArrowUp") {
+            topChar -= 1;
+            characterRect.setAttribute("style", U.format("left: {0}px; top: {1}px;", leftChar, topChar));
+        }
+
+        //Down
+        if (event.key === "ArrowDown") {
+            topChar += 1;
+            characterRect.setAttribute("style", U.format("left: {0}px; top: {1}px;", leftChar, topChar));
+        }
+
+        //Left
+        if (event.key === "ArrowLeft") { }
+
+        //Right
+        if (event.key === "ArrowRight") { }
+    };
+    document.addEventListener("keydown", moveCharacter);
     //Pure js (ECMA6)
+    //Display the map
     fetch(url)
         .then(
             res => res.text()
         )
         .then(
             text => {
-                var parser = new DOMParser();
-                var doc = parser.parseFromString(text, "application/xml");
+                let parser = new DOMParser();
+                let doc = parser.parseFromString(text, "application/xml");
 
                 Map.fromXML(doc, options).then(
                     map => {
@@ -164,7 +210,6 @@ require([
                         for (const [key, value] of Object.entries(ruleSets)) {
                             styleSheet.push(U.format(".{0} { {1} }", key, value));
                         }
-
                         style.appendChild(document.createTextNode(styleSheet.join("\n")));
                     }
                 )
@@ -172,5 +217,21 @@ require([
         )
         .catch((error) => {
             alert(`${error} - Failed to open TMX file.`);
-        });;
+        });
+
+    let worldmap = document.getElementById("map");
+
+    let characterRect = document.createElement("div");
+    characterRect.setAttribute("id", 'characterRect');
+    characterRect.setAttribute("class", "characterRectClass");
+
+    characterRect.setAttribute("style", U.format("left: {0}px; top: {1}px;", leftChar, topChar));
+
+    //characterRect.setAttribute("style", "left: 544px");
+    //characterRect.setAttribute("style", "top: 320px");
+
+    worldmap.appendChild(characterRect);
+
+
+
 });

@@ -14,6 +14,7 @@
         #map {
             position: relative;
             margin: 0 auto;
+            width: 1280px;
         }
 
         .characterRectClass {
@@ -22,6 +23,22 @@
             height: 32px;
             position: absolute;
             z-index: 1;
+        }
+
+        #characterSprite {
+            width: 48px;
+            height: 48px;
+            background: url('/examples/sprites/BODY_male.png');
+            z-index: 2;
+            position: absolute;
+        }
+
+        #fightBot {
+            width: 64px;
+            height: 64px;
+            background: url('/examples/sprites/combat_dummy.gif');
+            z-index: 2;
+            position: absolute;
         }
     </style>
 </head>

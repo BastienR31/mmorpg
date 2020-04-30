@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+//import { playSound, playEffect } from './sound';
+
 require.config({
     paths: {
         jquery: "lib/jquery",
@@ -27,7 +29,8 @@ require.config({
 
 require([
     "tmxjs/map",
-    "tmxjs/util/util"
+    "tmxjs/util/util",
+    "sound"
 ], function (
     Map,
     U
@@ -43,40 +46,60 @@ require([
     let topChar = 320;
     let leftChar = 544;
     let positionInitLeft = -8;
-    let positionInitRight = 114;
+    let positionInitRight = 121;
 
     let maxHealth = 100;
     let currentHealth = 100;
 
     let isInventoryDisplayed = false;
 
-    let characterSprite = document.createElement("div");
-    characterSprite.setAttribute("id", 'characterSprite');
-    characterSprite.setAttribute("style", U.format("left: {0}px; top: {1}px; background-position: {2}px {3}px;", leftChar, topChar, positionInitLeft, positionInitRight));
+    //Create a function to display and move items inside character
+    const displayCharacter = () => {
 
-    const playSound = () => {
+        let characterDiv = document.createElement("div");
 
-        let urlMusic = "/examples/sound/desert_ambient_1.mp3";
-        let sound = document.createElement("audio");
+        //@TODO : - Add character id
+        characterDiv.setAttribute("id", "characterDiv");
+        characterDiv.setAttribute("style", U.format("width: 48px; height: 55px; z-index: 2; position: absolute; left: {0}px; top: {1}px;", leftChar, topChar));
 
-        sound.src = urlMusic;
+        let characterBody = document.createElement("div");
+        characterBody.setAttribute("id", "characterBody");
+        characterBody.setAttribute("style", U.format("width: 48px; height: 55px; position: absolute; z-index: 2; background: url('/examples/sprites/BODY_male.png'); background-position: {0}px {1}px;", positionInitLeft, positionInitRight));
 
-        sound.volume = 0.01;
-        sound.play();
+        let characterHair = document.createElement("div");
+        characterHair.setAttribute("id", "characterHair");
+        characterHair.setAttribute("style", U.format("width: 48px; height: 20px; position: absolute; z-index: 3; background: url('/examples/sprites/HEAD_leather_armor_hat.png'); background-position: {0}px {1}px;", positionInitLeft, positionInitRight));
+
+        let characterArmor = document.createElement("div");
+        characterArmor.setAttribute("id", "characterArmor");
+        characterArmor.setAttribute("style", U.format("width: 48px; height: 48px; position: absolute; z-index: 3; background: url('/examples/sprites/TORSO_leather_armor_torso.png'); background-position: {0}px {1}px;", positionInitLeft, positionInitRight));
+
+        let characterWeapon = document.createElement("div");
+        characterWeapon.setAttribute("id", "characterWeapon");
+        characterWeapon.setAttribute("style", U.format("width: 48px; height: 48px; position: absolute; z-index: 3; background: url('/examples/sprites/WEAPON_dagger.png'); background-position: {0}px {1}px;", positionInitLeft, positionInitRight));
+
+        characterDiv.appendChild(characterBody);
+        characterDiv.appendChild(characterHair);
+        characterDiv.appendChild(characterArmor);
+        characterDiv.appendChild(characterWeapon);
+
+        worldmap.appendChild(characterDiv);
     };
 
-    const playEffect = (effect) => {
+    const displayAndMoveCharacter = (leftChar, topChar, positionInitLeft, positionInitRight) => {
 
-        console.log(effect, "melee_sound")
+        let characterDiv = document.getElementById("characterDiv");
+        let characterBody = document.getElementById("characterBody");
+        let characterHair = document.getElementById("characterHair");
+        let characterArmor = document.getElementById("characterArmor");
+        let characterWeapon = document.getElementById("characterWeapon");
 
-        let urlEffect = `/examples/sound/effects/${effect}.wav`;
-        let audioEffect = document.createElement("audio");
-
-        audioEffect.src = urlEffect;
-
-        audioEffect.volume = 0.3;
-        audioEffect.play();
-    }
+        characterDiv.setAttribute("style", U.format("width: 48px; height: 55px; z-index: 2; position: absolute; left: {0}px; top: {1}px;", leftChar, topChar));
+        characterBody.setAttribute("style", U.format("width: 48px; height: 55px; position: absolute; z-index: 2; background: url('/examples/sprites/BODY_male.png'); background-position: {0}px {1}px;", positionInitLeft, positionInitRight));
+        characterHair.setAttribute("style", U.format("width: 48px; height: 20px; position: absolute; z-index: 2; background: url('/examples/sprites/HEAD_leather_armor_hat.png'); background-position: {0}px {1}px;", positionInitLeft, positionInitRight));
+        characterArmor.setAttribute("style", U.format("width: 48px; height: 48px; position: absolute; z-index: 2; background: url('/examples/sprites/TORSO_leather_armor_torso.png'); background-position: {0}px {1}px;", positionInitLeft, positionInitRight));
+        characterWeapon.setAttribute("style", U.format("width: 48px; height: 48px; position: absolute; z-index: 2; background: url('/examples/sprites/WEAPON_dagger.png'); background-position: {0}px {1}px;", positionInitLeft, positionInitRight));
+    };
 
     //Move a character
     const moveCharacter = event => {
@@ -86,7 +109,7 @@ require([
 
         if (leftChar >= leftBot - 42 && leftChar <= leftBot + 42 && topChar >= topBot - 32 && topChar <= topBot + 32) {
             console.log('take damage')
-            playEffect("melee_sound");
+            playEffect("melee_sound.wav");
             currentHealth -= 1;
             displayLifeBar(currentHealth);
         }
@@ -95,29 +118,27 @@ require([
         if (event.key === "ArrowUp") {
             topChar -= 3;
             positionInitRight = 241;
-            characterSprite.setAttribute("style", U.format("left: {0}px; top: {1}px; background-position: {2}px {3}px;", leftChar, topChar, positionInitLeft, positionInitRight));
         }
 
         //Down
         if (event.key === "ArrowDown") {
             topChar += 3;
-            positionInitRight = 114;
-            characterSprite.setAttribute("style", U.format("left: {0}px; top: {1}px; background-position: {2}px {3}px;", leftChar, topChar, positionInitLeft, positionInitRight));
+            positionInitRight = 121;
         }
 
         //Left
         if (event.key === "ArrowLeft") {
             leftChar -= 3;
-            positionInitRight = 177;
-            characterSprite.setAttribute("style", U.format("left: {0}px; top: {1}px; background-position: {2}px {3}px;", leftChar, topChar, positionInitLeft, positionInitRight));
+            positionInitRight = 181;
         }
 
         //Right
         if (event.key === "ArrowRight") {
             leftChar += 3;
-            positionInitRight = 49;
-            characterSprite.setAttribute("style", U.format("left: {0}px; top: {1}px; background-position: {2}px {3}px;", leftChar, topChar, positionInitLeft, positionInitRight));
+            positionInitRight = 53;
         }
+
+        displayAndMoveCharacter(leftChar, topChar, positionInitLeft, positionInitRight);
     };
 
     const displayLifeBar = (currentHealth) => {
@@ -145,7 +166,7 @@ require([
     };
 
     const items = () => {
-        let potions = "examples/items/potions.png";
+        let potions = "examples/items/potions_preview.png";
 
         /*let displayPotions = document.createElement("div");
         displayPotions.setAttribute("id", "potions");
@@ -186,8 +207,6 @@ require([
         console.log(event)
         console.log(event.key)
 
-        console.log(isInventoryDisplayed)
-
         if (event.code === "KeyI" && isInventoryDisplayed === true) {
 
             console.log(isInventoryDisplayed)
@@ -201,19 +220,24 @@ require([
             isInventoryDisplayed = false;
         }
         else if (event.code === "KeyI" && isInventoryDisplayed === false) {
-            console.log("display inventory")
+
+            playEffect("land.wav");
 
             isInventoryDisplayed = true;
 
             let inventory = document.createElement("div");
             inventory.setAttribute("id", "inventory");
-            inventory.setAttribute("style", "width: 250px; height: 200px; border: 1px solid rgba(95, 73, 46, .7); border-radius: 6px; background-color: #856D4D; opacity: 0.7;z-index: 2; position: absolute; top: 100px; left: 450px; display: flex; align-items: flex-end;");
+            inventory.setAttribute("style", "width: 300px; height: 400px; border: 3px solid rgba(95, 73, 46, .7); border-radius: 6px; background-color: #856D4D; opacity: 1.0; z-index: 2; position: absolute; top: 100px; left: 415px; display: flex; flex-direction:  column; align-items: flex-end;");
 
             const arrayInventory1 = ["cell1", "cell2", "cell3", "cell4"];
             const arrayInventory2 = ["cell5", "cell6", "cell7", "cell8"];
 
+            let title = document.createElement("div");
+
+            let content = document.createElement("div");
+
             let inventoryTable = document.createElement("table");
-            inventoryTable.setAttribute("style", "width: 100%; height: 50%; border: 1px solid black;")
+            inventoryTable.setAttribute("style", "width: 100%; height: 40%; border: 1px solid black;")
             let inventoryRow1 = document.createElement("tr");
             let inventoryRow2 = document.createElement("tr");
             //let inventoryCell = document.createElement("td");
@@ -225,14 +249,14 @@ require([
                     if (arrayInventoryItem !== undefined) {
                         let inventoryCell = document.createElement("td");
                         inventoryCell.setAttribute("id", `${arrayInventoryItem}`);
-                        inventoryCell.setAttribute("style", "height: 50px; width: 50px; border: 1px solid black;");
+                        inventoryCell.setAttribute("style", "height: 50px; width: 50px; border: 1px solid black; background-color: lightslategray;");
                         inventoryCell.addEventListener("click", () => alert(`test ${arrayInventoryItem}`));
 
                         if (index === 0) {
 
                             let wrapper = document.createElement('td');
                             wrapper.setAttribute("id", `${arrayInventoryItem}`);
-                            wrapper.setAttribute("style", "height: 50px; width: 50px; border: 1px solid black;");
+                            wrapper.setAttribute("style", "height: 50px; width: 50px; border: 1px solid black; background-color: lightslategray;");
 
                             wrapper.addEventListener(
                                 "click", () => {
@@ -241,7 +265,7 @@ require([
                                     cell1.removeChild(cell1.firstChild);
                                 }
                             );
-                            wrapper.innerHTML = `<div style="background: url(${potions[0]}); width: 24px; height: 24px;"></div>`;
+                            wrapper.innerHTML = `<div style="background: url(${potions[0]}); width: 38px; height: 32px; background-position-x: -27px; background-position-y: 0px"></div>`;
 
                             console.log(potions)
                             inventoryCell = wrapper;
@@ -257,7 +281,7 @@ require([
                     if (arrayInventoryItem !== undefined) {
                         let inventoryCell = document.createElement("td");
                         inventoryCell.setAttribute("id", `${arrayInventoryItem}`);
-                        inventoryCell.setAttribute("style", "height: 50px; width: 50px; border: 1px solid black;");
+                        inventoryCell.setAttribute("style", "height: 50px; width: 50px; border: 1px solid black; background-color: lightslategray;");
                         inventoryRow2.appendChild(inventoryCell);
                     }
                 }
@@ -266,6 +290,7 @@ require([
             inventoryTable.appendChild(inventoryRow1);
             inventoryTable.appendChild(inventoryRow2);
 
+            inventory.appendChild(title);
             inventory.appendChild(inventoryTable);
 
             worldmap.appendChild(inventory);
@@ -278,40 +303,38 @@ require([
 
         displayInventory(event);
 
-        if (cpt === 1) {
-            positionInitLeft = -70;
-            characterSprite.setAttribute("style", U.format("left: {0}px; top: {1}px; background-position: {2}px {3}px;", leftChar, topChar, positionInitLeft, positionInitRight));
-        }
-        if (cpt === 2) {
-            positionInitLeft = -134;
-            characterSprite.setAttribute("style", U.format("left: {0}px; top: {1}px; background-position: {2}px {3}px;", leftChar, topChar, positionInitLeft, positionInitRight));
-        }
-        if (cpt === 3) {
-            positionInitLeft = -198;
-            characterSprite.setAttribute("style", U.format("left: {0}px; top: {1}px; background-position: {2}px {3}px;", leftChar, topChar, positionInitLeft, positionInitRight));
-        }
-        if (cpt === 4) {
-            positionInitLeft = -262;
-            characterSprite.setAttribute("style", U.format("left: {0}px; top: {1}px; background-position: {2}px {3}px;", leftChar, topChar, positionInitLeft, positionInitRight));
-        }
-        if (cpt === 5) {
-            positionInitLeft = -326;
-            characterSprite.setAttribute("style", U.format("left: {0}px; top: {1}px; background-position: {2}px {3}px;", leftChar, topChar, positionInitLeft, positionInitRight));
-        }
-        if (cpt === 6) {
-            positionInitLeft = -390;
-            characterSprite.setAttribute("style", U.format("left: {0}px; top: {1}px; background-position: {2}px {3}px;", leftChar, topChar, positionInitLeft, positionInitRight));
-        }
-        if (cpt === 7) {
-            positionInitLeft = -454;
-            characterSprite.setAttribute("style", U.format("left: {0}px; top: {1}px; background-position: {2}px {3}px;", leftChar, topChar, positionInitLeft, positionInitRight));
-        }
-        if (cpt === 8) {
-            positionInitLeft = -8;
-            characterSprite.setAttribute("style", U.format("left: {0}px; top: {1}px; background-position: {2}px {3}px;", leftChar, topChar, positionInitLeft, positionInitRight));
-            cpt = 0;
+        switch (cpt) {
+            case 1:
+                positionInitLeft = -70;
+                break;
+            case 2:
+                positionInitLeft = -134;
+                break;
+            case 3:
+                positionInitLeft = -198;
+                break;
+            case 4:
+                positionInitLeft = -262;
+                break;
+            case 5:
+                positionInitLeft = -326;
+                break;
+            case 6:
+                positionInitLeft = -392;
+                break;
+            case 7:
+                positionInitLeft = -454;
+                break;
+            case 8:
+                positionInitLeft = -8;
+                cpt = 0;
+                break;
+            default:
+                break;
         }
         cpt++;
+
+        displayAndMoveCharacter(leftChar, topChar, positionInitLeft, positionInitRight);
         setInterval(moveCharacter(event), 4000);
     });
 
@@ -461,5 +484,6 @@ require([
     botCombat.setAttribute("style", U.format("left: {0}px; top: {1}px;", leftBot, topBot));
 
     worldmap.appendChild(botCombat);
-    worldmap.appendChild(characterSprite);
+
+    displayCharacter();
 });
